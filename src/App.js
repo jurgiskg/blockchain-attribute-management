@@ -65,6 +65,7 @@ class App extends Component {
 
       userAttributeStore.deployed().then(x => {
         this.setState({userAttributeStoreInstance: x});
+        this.state.userAttributeStoreInstance.AccessRequest().watch((err, response) => this.accessRequested(err, response));
         return this.state.userAttributeStoreInstance.addAttribute(0, accounts[5], "This is the attribute", {from: accounts[1]});
       }).then(result => {
         console.log(result);
@@ -72,8 +73,12 @@ class App extends Component {
     })
   }
 
+  accessRequested = (error, response) => {
+    console.log(response);
+  }
+
   printAttributes = () => {
-    this.state.userAttributeStoreInstance.getAttribute(0, this.state.accounts[5]).then((result) => {
+    this.state.userAttributeStoreInstance.getAttribute(0, {from: this.state.accounts[0]}).then((result) => {
       console.log(result);
     });
   }
