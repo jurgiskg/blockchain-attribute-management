@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import SimpleStorageContract from '../build/contracts/SimpleStorage.json';
-import FoodStoreContract from '../build/contracts/FoodStore.json';
+import UserAttributeStoreContract from '../build/contracts/UserAttributeStore.json';
 import getWeb3 from './utils/getWeb3';
 
 import './css/oswald.css'
@@ -31,23 +31,16 @@ class App extends Component {
   }
 
   instantiateContract() {
-    /*
-     * SMART CONTRACT EXAMPLE
-     *
-     * Normally these functions would be called in the context of a
-     * state management library, but for convenience I've placed them here.
-     */
-
     const contract = require('truffle-contract')
     const simpleStorage = contract(SimpleStorageContract);
-    const foodStore = contract(FoodStoreContract);
+    const userAttributeStore = contract(UserAttributeStoreContract);
 
     simpleStorage.setProvider(this.state.web3.currentProvider)
-    foodStore.setProvider(this.state.web3.currentProvider)
+    userAttributeStore.setProvider(this.state.web3.currentProvider);
 
     // Declaring this for later so we can chain functions on SimpleStorage.
     var simpleStorageInstance;
-    var foodStoreInstance;
+    var userAttributeStoreInstance;
 
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
@@ -63,8 +56,11 @@ class App extends Component {
         return this.setState({ storageValue: result.c[0] })
       })
 
-      foodStore.deployed().then(x => {
-        foodStoreInstance = x;
+      userAttributeStore.deployed().then(x => {
+        userAttributeStoreInstance = x;
+        return userAttributeStoreInstance.addAttribute();
+      }).then(result => {
+        console.log(result);
       })
     })
   }
