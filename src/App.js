@@ -8,15 +8,20 @@ import './css/open-sans.css'
 import './css/pure-min.css'
 import './App.css'
 
+const contract = require('truffle-contract')
+
 class App extends Component {
   constructor(props) {
     super(props)
 
     this.state = {
       storageValue: 0,
-      web3: null
+      web3: null,
+      userAttributeStoreInstance: null,
+      accounts: []
     }
   }
+
 
   componentWillMount() {
     getWeb3.then(results => {
@@ -31,7 +36,7 @@ class App extends Component {
   }
 
   instantiateContract() {
-    const contract = require('truffle-contract')
+    
     const simpleStorage = contract(SimpleStorageContract);
     const userAttributeStore = contract(UserAttributeStoreContract);
 
@@ -44,6 +49,8 @@ class App extends Component {
 
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
+      this.setState({accounts: accounts});
+
       simpleStorage.deployed().then((x) => {
         simpleStorageInstance = x
         // Stores a given value, 5 by default.
@@ -57,12 +64,18 @@ class App extends Component {
       })
 
       userAttributeStore.deployed().then(x => {
-        userAttributeStoreInstance = x;
-        return userAttributeStoreInstance.addAttribute();
+        this.setState({userAttributeStoreInstance: x});
+        return this.state.userAttributeStoreInstance.addAttribute(0, accounts[5], "This is the attribute", {from: accounts[1]});
       }).then(result => {
         console.log(result);
       })
     })
+  }
+
+  printAttributes = () => {
+    this.state.userAttributeStoreInstance.getAttribute(0, this.state.accounts[5]).then((result) => {
+      console.log(result);
+    });
   }
 
   render() {
@@ -82,6 +95,7 @@ class App extends Component {
               <p>Try changing the value stored on <strong>line 59</strong> of App.js.</p>
               <p>The stored value is: {this.state.storageValue}</p>
               <p>{this.state.foodStore}</p>
+              <button onClick={this.printAttributes}>Print attributes to console</button>
             </div>
           </div>
         </main>
