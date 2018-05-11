@@ -1,19 +1,20 @@
 pragma solidity ^0.4.23;
 
 contract UserAttributeStore {
-    //TODO: change to actual user, not contract creator
     address public userAddress = msg.sender;
+
     struct ServiceAttribute {
-        bool initialized;
         bool accessGranted;
         string value;
     }
-    //ENUMs cannot be keys. To be passed as uint(Enum.ONE)
-    mapping (uint => mapping(address => ServiceAttribute)) public attributes;
+
     event AccessRequest (
         address serviceAddress,
         uint attributeId
     );
+
+    //ENUMs cannot be keys. To be passed as uint(Enum.ONE)
+    mapping (uint => mapping(address => ServiceAttribute)) public attributes;
     enum Attribute {NAME, SURNAME, TELEPHONE, NICKNAME}
 
     modifier onlyBy(address _account) {
@@ -24,17 +25,33 @@ contract UserAttributeStore {
         _;
     }
 
-    //TODO: add onlyBy(userAddress)
-    function addAttribute(uint attributeId, address serviceAddress, string value) public {
-        attributes[attributeId][serviceAddress].value = value;
+    function grantAccess(uint attributeId, address serviceAddress, string value)
+        public
+        onlyBy(userAddress)
+    {
         attributes[attributeId][serviceAddress].accessGranted = true;
+        attributes[attributeId][serviceAddress].value = value;
     }
 
-    //currently only for services
+    function removeAccess(uint attributeId, address serviceAddress)
+        public
+        onlyBy(userAddress)
+    {
+        attributes[attributeId][serviceAddress].accessGranted = false;
+        //needed to separate from uninitialized values
+        attributes[attributeId][serviceAddress].value = "ACCESS DENIED";
+    }
+
     function getAttribute(uint attributeId) public returns (string) {
-        if (attributes[attributeId][msg.sender].initialized == false) {
-            attributes[attributeId][msg.sender].initialized = true;
+        if (bytes(attributes[attributeId][msg.sender].value).length == 0) {
             emit AccessRequest(msg.sender, attributeId);
+            return ("Access request issued");
+        } else {
+            if (msg.sender == userAddress || attributes[attributeId][msg.sender].accessGranted) {
+                return attributes[attributeId][msg.sender].value;
+            } else {
+                return ("Access denied");
+            }
         }
         return attributes[attributeId][msg.sender].value;
     }

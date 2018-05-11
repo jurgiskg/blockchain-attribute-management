@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import SimpleStorageContract from '../build/contracts/SimpleStorage.json';
 import UserAttributeStoreContract from '../build/contracts/UserAttributeStore.json';
 import getWeb3 from './utils/getWeb3';
 
@@ -15,9 +14,10 @@ class App extends Component {
     super(props)
 
     this.state = {
-      storageValue: 0,
+      userAddress: "",
+      attributeStoreContract: null,
+      attributeStoreInstance: null,
       web3: null,
-      userAttributeStoreInstance: null,
       accounts: []
     }
   }
@@ -37,40 +37,26 @@ class App extends Component {
 
   instantiateContract() {
     
-    const simpleStorage = contract(SimpleStorageContract);
-    const userAttributeStore = contract(UserAttributeStoreContract);
-
-    simpleStorage.setProvider(this.state.web3.currentProvider)
-    userAttributeStore.setProvider(this.state.web3.currentProvider);
-
-    // Declaring this for later so we can chain functions on SimpleStorage.
-    var simpleStorageInstance;
-    var userAttributeStoreInstance;
+    const storeContract = contract(UserAttributeStoreContract);
+    storeContract.setProvider(this.state.web3.currentProvider);
 
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
       this.setState({accounts: accounts});
-
-      simpleStorage.deployed().then((x) => {
-        simpleStorageInstance = x
-        // Stores a given value, 5 by default.
-        return simpleStorageInstance.set(20, {from: accounts[0]})
-      }).then((result) => {
-        // Get the value from the contract to prove it worked.
-        return simpleStorageInstance.get.call(accounts[0])
-      }).then((result) => {
-        // Update state with the result.
-        return this.setState({ storageValue: result.c[0] })
+      this.setState({userAddress: accounts[0]});
+      storeContract.defaults({
+        from: accounts[0],
+        gas: 4600000
       })
+      this.setState({attributeStoreContract: storeContract});
 
-      userAttributeStore.deployed().then(x => {
-        this.setState({userAttributeStoreInstance: x});
-        this.state.userAttributeStoreInstance.AccessRequest().watch((err, response) => this.accessRequested(err, response));
-        return this.state.userAttributeStoreInstance.addAttribute(0, accounts[5], "This is the attribute", {from: accounts[1]});
-      }).then(result => {
-        console.log(result);
-      })
+      storeContract.new().then((result) => {
+        this.setState({attributeStoreInstance: result})
+      });
     })
+
+    
+    
   }
 
   accessRequested = (error, response) => {
@@ -93,8 +79,8 @@ class App extends Component {
         <main className="container">
           <div className="pure-g">
             <div className="pure-u-1-1">
-              <h1>Good to Go!</h1>
-              <p>Your Truffle Box is installed and ready.</p>
+              <h2>User: {this.state.userAddress}</h2>
+              <p>User attribute store: {this.state.attributeStoreInstance && this.state.attributeStoreInstance.address}</p>
               <h2>Smart Contract Example</h2>
               <p>If your contracts compiled and migrated successfully, below will show a stored value of 5 (by default).</p>
               <p>Try changing the value stored on <strong>line 59</strong> of App.js.</p>
