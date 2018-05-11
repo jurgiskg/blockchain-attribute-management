@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import UserAttributeStoreContract from '../build/contracts/UserAttributeStore.json';
 import getWeb3 from './utils/getWeb3';
+import { attributes } from './attributes';
 
 import './css/oswald.css'
 import './css/open-sans.css'
@@ -44,6 +45,7 @@ class App extends Component {
     this.state.web3.eth.getAccounts((error, accounts) => {
       this.setState({accounts: accounts});
       this.setState({userAddress: accounts[0]});
+      //set the default from to be the current user
       storeContract.defaults({
         from: accounts[0],
         gas: 4600000
@@ -54,19 +56,43 @@ class App extends Component {
         this.setState({attributeStoreInstance: result})
       });
     })
-
-    
-    
   }
 
   accessRequested = (error, response) => {
     console.log(response);
   }
 
-  printAttributes = () => {
-    this.state.userAttributeStoreInstance.getAttribute(0, {from: this.state.accounts[0]}).then((result) => {
+  grantAccess = () => {
+    this.state.attributeStoreInstance.grantAccess(this.refs.attributeId.value,
+      this.refs.serviceAddress.value,
+      this.refs.attributeValue.value
+    ).then((result) => {
       console.log(result);
-    });
+    })
+  }
+
+  removeAccess = () => {
+    this.state.attributeStoreInstance.removeAccess(this.refs.removeAttributeId.value,
+      this.refs.removeServiceAddress.value
+    ).then((result) => {
+      console.log(result);
+    })
+  }
+
+  getAttribute = () => {
+    this.state.attributeStoreInstance.getAttribute.call(this.refs.getAttributeId.value,
+      {from: this.refs.getAttributeFromAddress.value}
+    ).then((result) => {
+      console.log(result)
+    })
+  }
+
+  requestAttributeAccess = () => {
+    this.state.attributeStoreInstance.requestAttributeAccess(this.refs.requestAttributeId.value,
+      {from: this.refs.requestAttributeFromAddress.value}
+    ).then((result) => {
+      console.log(result);
+    })
   }
 
   render() {
@@ -78,16 +104,84 @@ class App extends Component {
 
         <main className="container">
           <div className="pure-g">
-            <div className="pure-u-1-1">
+            <div className="pure-u-1-2">
               <h2>User: {this.state.userAddress}</h2>
               <p>User attribute store: {this.state.attributeStoreInstance && this.state.attributeStoreInstance.address}</p>
-              <h2>Smart Contract Example</h2>
-              <p>If your contracts compiled and migrated successfully, below will show a stored value of 5 (by default).</p>
-              <p>Try changing the value stored on <strong>line 59</strong> of App.js.</p>
-              <p>The stored value is: {this.state.storageValue}</p>
-              <p>{this.state.foodStore}</p>
-              <button onClick={this.printAttributes}>Print attributes to console</button>
+              <br/>
+              <h3>Attributes</h3>
+              {Object.keys(attributes).map(e => 
+                <div key={e}>{e} - {attributes[e]}</div>
+              )}
+              <br/>
             </div>
+            <div className="pure-u-1-2">
+              <h3>Other addresses:</h3>
+              
+              {this.state.accounts.map((acc, index) => (
+                index !== 0 ? <div key={index}>{acc}</div> : ""
+              ))}
+            </div>
+            <div className="pure-u-1-4">
+              <h3>Grant access</h3>
+              <div>
+                <label>Attribute Id </label> 
+                <input ref="attributeId"/>
+              </div>
+              <div>
+                <label>Attribute value </label> 
+                <input ref="attributeValue"/>
+              </div>
+              <div>
+                <label>Service address </label>
+                <input ref="serviceAddress"/>
+              </div>
+            
+              <button onClick={this.grantAccess}>Send</button>
+              <div>Check console for result</div>
+            </div>
+            <div className="pure-u-1-4">
+              <h3>Remove access</h3>
+              <div>
+                <label>Attribute Id </label> 
+                <input ref="removeAttributeId"/>
+              </div>
+              <div>
+                <label>Service address </label> 
+                <input ref="removeServiceAddress"/>
+              </div>
+
+              <button onClick={this.removeAccess}>Send</button>
+              <div>Check console for result</div>
+            </div>
+            <div className="pure-u-1-4">
+              <h3>Get attribute</h3>
+              <div>
+                <label>Attribute Id </label> 
+                <input ref="getAttributeId"/>
+              </div>
+              <div>
+                <label>Adress to send from</label> 
+                <input ref="getAttributeFromAddress"/>
+              </div>
+
+              <button onClick={this.getAttribute}>Send</button>
+              <div>Check console for result</div>
+            </div>
+            <div className="pure-u-1-4">
+              <h3>Request attribute access</h3>
+              <div>
+                <label>Attribute Id </label> 
+                <input ref="requestAttributeId"/>
+              </div>
+              <div>
+                <label>Adress to send from</label> 
+                <input ref="requestAttributeFromAddress"/>
+              </div>
+
+              <button onClick={this.requestAttributeAccess}>Send</button>
+              <div>Check console for result</div>
+            </div>
+            
           </div>
         </main>
       </div>

@@ -15,7 +15,6 @@ contract UserAttributeStore {
 
     //ENUMs cannot be keys. To be passed as uint(Enum.ONE)
     mapping (uint => mapping(address => ServiceAttribute)) public attributes;
-    enum Attribute {NAME, SURNAME, TELEPHONE, NICKNAME}
 
     modifier onlyBy(address _account) {
         require(
@@ -39,13 +38,12 @@ contract UserAttributeStore {
     {
         attributes[attributeId][serviceAddress].accessGranted = false;
         //needed to separate from uninitialized values
-        attributes[attributeId][serviceAddress].value = "ACCESS DENIED";
+        attributes[attributeId][serviceAddress].value = "X";
     }
 
-    function getAttribute(uint attributeId) public returns (string) {
+    function getAttribute(uint attributeId) public view returns (string) {
         if (bytes(attributes[attributeId][msg.sender].value).length == 0) {
-            emit AccessRequest(msg.sender, attributeId);
-            return ("Access request issued");
+            return ("Please request access first");
         } else {
             if (msg.sender == userAddress || attributes[attributeId][msg.sender].accessGranted) {
                 return attributes[attributeId][msg.sender].value;
@@ -53,6 +51,9 @@ contract UserAttributeStore {
                 return ("Access denied");
             }
         }
-        return attributes[attributeId][msg.sender].value;
+    }
+
+    function requestAttributeAccess(uint attributeId) public {
+        emit AccessRequest(msg.sender, attributeId);
     }
 }
