@@ -29,7 +29,7 @@ class App extends Component {
       this.setState({
         web3: results.web3
       })
-      this.instantiateContract()
+      this.instantiateContract();
     })
       .catch(() => {
         console.log('Error finding web3.')
@@ -40,6 +40,7 @@ class App extends Component {
 
     const storeContract = contract(UserAttributeStoreContract);
     storeContract.setProvider(this.state.web3.currentProvider);
+
 
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
@@ -53,8 +54,25 @@ class App extends Component {
       this.setState({ attributeStoreContract: storeContract });
 
       storeContract.new().then((result) => {
-        this.setState({ attributeStoreInstance: result })
+        this.setState({ attributeStoreInstance: result });
+        this.estimatePrices(result);
       });
+    })
+  }
+
+  estimatePrices = (instance) => {
+    
+    instance.grantAccess.estimateGas(2, this.state.accounts[1], true, "tZM11CdI7z4mZJc+/5kg3Q==").then((result) => {
+      console.log(`grantAccess(2, this.state.accounts[1], "tZM11CdI7z4mZJc+/5kg3Q=="): ${result}`)
+    })
+    instance.removeAccess.estimateGas(2, this.state.accounts[1]).then((result) => {
+      console.log(`removeAccess(2, this.state.accounts[1]): ${result}`)
+    })
+    instance.getAttribute.estimateGas(2, this.state.userAddress, this.state.accounts[1]).then((result) => {
+      console.log(`getAttribute(2, this.state.userAddress, this.state.accounts[1]): ${result}`)
+    })
+    instance.requestAttributeAccess.estimateGas(2, this.state.userAddress).then((result) => {
+      console.log(`requestAttributeAccess(2, this.state.userAddress): ${result}`);
     })
   }
 
@@ -81,6 +99,8 @@ class App extends Component {
 
   getAttribute = () => {
     this.state.attributeStoreInstance.getAttribute.call(this.refs.getAttributeId.value,
+      this.state.userAddress,
+      this.refs.getAttributeFromAddress.value,
       { from: this.refs.getAttributeFromAddress.value }
     ).then((result) => {
       console.log(result)
@@ -88,7 +108,8 @@ class App extends Component {
   }
 
   getAttributeAsUser = () => {
-    this.state.attributeStoreInstance.getAttributeAsUser.call(this.refs.getAttributeAsUserId.value,
+    this.state.attributeStoreInstance.getAttribute.call(this.refs.getAttributeAsUserId.value,
+      this.state.userAddress,
       this.refs.getAttributeAsUserAddress.value).then((result) => {
       console.log(result);
     })
@@ -96,6 +117,7 @@ class App extends Component {
 
   requestAttributeAccess = () => {
     this.state.attributeStoreInstance.requestAttributeAccess(this.refs.requestAttributeId.value,
+      this.state.userAddress,
       { from: this.refs.requestAttributeFromAddress.value }
     ).then((result) => {
       console.log(result);
@@ -104,7 +126,7 @@ class App extends Component {
 
   getUserActions = () => {
     return (
-      <div className="pure-g" style={{"border-top": "1px solid"}}>
+      <div className="pure-g" style={{"borderTop": "1px solid"}}>
         <div className="pure-u-1-1">
           <h2>User actions</h2>
         </div>
@@ -160,7 +182,7 @@ class App extends Component {
 
   getServiceActions = () => {
     return (
-      <div className="pure-g" style={{"border-top": "1px solid"}}>
+      <div className="pure-g" style={{"borderTop": "1px solid"}}>
         <div className="pure-u-1-1">
           <h2>Service actions</h2>
         </div>

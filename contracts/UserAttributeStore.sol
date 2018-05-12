@@ -1,66 +1,58 @@
 pragma solidity ^0.4.23;
 
 contract UserAttributeStore {
-    address public userAddress = msg.sender;
-
     struct ServiceAttribute {
         bool accessGranted;
         string value;
     }
+    mapping (address => mapping(uint => mapping(address => ServiceAttribute))) public attributes;
 
-    event AccessRequest (
+    event AccessRequested (
+        address userAddress,
         address serviceAddress,
         uint attributeId
     );
+    event AccessChanged (
+        address userAddress,
+        address serviceAddress,
+        uint attributeId,
+        bool status
+    );
 
-    mapping (uint => mapping(address => ServiceAttribute)) public attributes;
-
-    modifier onlyBy(address _account) {
-        require(
-            msg.sender == _account,
-            "Sender not authorized."
-        );
-        _;
+    function grantAccess(uint attributeId, address serviceAddress, string value) public {
+        changeAccess(attributeId, serviceAddress, true, value);
     }
 
-    function grantAccess(uint attributeId, address serviceAddress, string value)
+    function removeAccess(uint attributeId, address serviceAddress) public {
+        changeAccess(attributeId, serviceAddress, false, "X");
+    }
+
+    function changeAccess(uint attributeId, address serviceAddress, bool granted, string value) private {
+        attributes[msg.sender][attributeId][serviceAddress].accessGranted = granted;
+        attributes[msg.sender][attributeId][serviceAddress].value = value;
+        emit AccessChanged(msg.sender, serviceAddress, attributeId, granted);
+    }
+
+    function requestAttributeAccess(uint attributeId, address userAddress) public {
+        emit AccessRequested(userAddress, msg.sender, attributeId);
+    }
+
+    function getAttribute(uint attributeId, address userAddress, address serviceAddress) 
         public
-        onlyBy(userAddress)
-    {
-        attributes[attributeId][serviceAddress].accessGranted = true;
-        attributes[attributeId][serviceAddress].value = value;
-    }
-
-    function removeAccess(uint attributeId, address serviceAddress)
-        public
-        onlyBy(userAddress)
-    {
-        attributes[attributeId][serviceAddress].accessGranted = false;
-        attributes[attributeId][serviceAddress].value = "X";
-    }
-
-    function getAttributeAsUser(uint attributeId, address serviceAddress) 
-        public 
         view
-        onlyBy(userAddress) 
-        returns (string)
+        returns (string) 
     {
-        return attributes[attributeId][serviceAddress].value;
-    }
-
-    function getAttribute(uint attributeId) public view returns (string) {
-        if (bytes(attributes[attributeId][msg.sender].value).length == 0) {
-            return ("Please request access first");
+        if (msg.sender == userAddress) {
+            return attributes[msg.sender][attributeId][serviceAddress].value;
+        }
+        if (bytes(attributes[userAddress][attributeId][serviceAddress].value).length == 0) {
+            return "Please request access first";
         } else {
-            if (attributes[attributeId][msg.sender].accessGranted) {
-                return attributes[attributeId][msg.sender].value;
+            if (attributes[userAddress][attributeId][serviceAddress].accessGranted) {
+                return attributes[userAddress][attributeId][serviceAddress].value;
             } else {
-                return ("Access denied");
+                return "Access denied";
             }
         }
-    }
-
-    function requestAttributeAccess(uint attributeId) public {
-        emit AccessRequest(msg.sender, attributeId);
     }
 }
