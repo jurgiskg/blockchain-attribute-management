@@ -13,7 +13,6 @@ contract UserAttributeStore {
         uint attributeId
     );
 
-    //ENUMs cannot be keys. To be passed as uint(Enum.ONE)
     mapping (uint => mapping(address => ServiceAttribute)) public attributes;
 
     modifier onlyBy(address _account) {
@@ -37,15 +36,23 @@ contract UserAttributeStore {
         onlyBy(userAddress)
     {
         attributes[attributeId][serviceAddress].accessGranted = false;
-        //needed to separate from uninitialized values
         attributes[attributeId][serviceAddress].value = "X";
+    }
+
+    function getAttributeAsUser(uint attributeId, address serviceAddress) 
+        public 
+        view
+        onlyBy(userAddress) 
+        returns (string)
+    {
+        return attributes[attributeId][serviceAddress].value;
     }
 
     function getAttribute(uint attributeId) public view returns (string) {
         if (bytes(attributes[attributeId][msg.sender].value).length == 0) {
             return ("Please request access first");
         } else {
-            if (msg.sender == userAddress || attributes[attributeId][msg.sender].accessGranted) {
+            if (attributes[attributeId][msg.sender].accessGranted) {
                 return attributes[attributeId][msg.sender].value;
             } else {
                 return ("Access denied");

@@ -31,29 +31,29 @@ class App extends Component {
       })
       this.instantiateContract()
     })
-    .catch(() => {
-      console.log('Error finding web3.')
-    })
+      .catch(() => {
+        console.log('Error finding web3.')
+      })
   }
 
   instantiateContract() {
-    
+
     const storeContract = contract(UserAttributeStoreContract);
     storeContract.setProvider(this.state.web3.currentProvider);
 
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
-      this.setState({accounts: accounts});
-      this.setState({userAddress: accounts[0]});
+      this.setState({ accounts: accounts });
+      this.setState({ userAddress: accounts[0] });
       //set the default from to be the current user
       storeContract.defaults({
         from: accounts[0],
         gas: 4600000
       })
-      this.setState({attributeStoreContract: storeContract});
+      this.setState({ attributeStoreContract: storeContract });
 
       storeContract.new().then((result) => {
-        this.setState({attributeStoreInstance: result})
+        this.setState({ attributeStoreInstance: result })
       });
     })
   }
@@ -81,25 +81,126 @@ class App extends Component {
 
   getAttribute = () => {
     this.state.attributeStoreInstance.getAttribute.call(this.refs.getAttributeId.value,
-      {from: this.refs.getAttributeFromAddress.value}
+      { from: this.refs.getAttributeFromAddress.value }
     ).then((result) => {
       console.log(result)
     })
   }
 
+  getAttributeAsUser = () => {
+    this.state.attributeStoreInstance.getAttributeAsUser.call(this.refs.getAttributeAsUserId.value,
+      this.refs.getAttributeAsUserAddress.value).then((result) => {
+      console.log(result);
+    })
+  }
+
   requestAttributeAccess = () => {
     this.state.attributeStoreInstance.requestAttributeAccess(this.refs.requestAttributeId.value,
-      {from: this.refs.requestAttributeFromAddress.value}
+      { from: this.refs.requestAttributeFromAddress.value }
     ).then((result) => {
       console.log(result);
     })
+  }
+
+  getUserActions = () => {
+    return (
+      <div className="pure-g" style={{"border-top": "1px solid"}}>
+        <div className="pure-u-1-1">
+          <h2>User actions</h2>
+        </div>
+        <div className="pure-u-1-4">
+          <h3>Grant access</h3>
+          <div>
+            <label>Attribute Id </label>
+            <input ref="attributeId" />
+          </div>
+          <div>
+            <label>Attribute value </label>
+            <input ref="attributeValue" />
+          </div>
+          <div>
+            <label>Service address </label>
+            <input ref="serviceAddress" />
+          </div>
+
+          <button onClick={this.grantAccess}>Send</button>
+          <div>Check console for result</div>
+        </div>
+        <div className="pure-u-1-4">
+          <h3>Remove access</h3>
+          <div>
+            <label>Attribute Id </label>
+            <input ref="removeAttributeId" />
+          </div>
+          <div>
+            <label>Service address </label>
+            <input ref="removeServiceAddress" />
+          </div>
+
+          <button onClick={this.removeAccess}>Send</button>
+          <div>Check console for result</div>
+        </div>
+        <div className="pure-u-1-4">
+          <h3>Get attribute</h3>
+          <div>
+            <label>Attribute Id </label>
+            <input ref="getAttributeAsUserId" />
+          </div>
+          <div>
+            <label>Service address </label>
+            <input ref="getAttributeAsUserAddress" />
+          </div>
+          <button onClick={this.getAttributeAsUser}>Send</button>
+          <div>Check console for result</div>
+        </div>
+
+      </div>
+    )
+  }
+
+  getServiceActions = () => {
+    return (
+      <div className="pure-g" style={{"border-top": "1px solid"}}>
+        <div className="pure-u-1-1">
+          <h2>Service actions</h2>
+        </div>
+        <div className="pure-u-1-4">
+          <h3>Get attribute</h3>
+          <div>
+            <label>Attribute Id </label>
+            <input ref="getAttributeId" />
+          </div>
+          <div>
+            <label>Adress to send from</label>
+            <input ref="getAttributeFromAddress" />
+          </div>
+
+          <button onClick={this.getAttribute}>Send</button>
+          <div>Check console for result</div>
+        </div>
+        <div className="pure-u-1-4">
+          <h3>Request attribute access</h3>
+          <div>
+            <label>Attribute Id </label>
+            <input ref="requestAttributeId" />
+          </div>
+          <div>
+            <label>Adress to send from</label>
+            <input ref="requestAttributeFromAddress" />
+          </div>
+
+          <button onClick={this.requestAttributeAccess}>Send</button>
+          <div>Check console for result</div>
+        </div>
+      </div>
+    )
   }
 
   render() {
     return (
       <div className="App">
         <nav className="navbar pure-menu pure-menu-horizontal">
-            <a href="#" className="pure-menu-heading pure-menu-link">Truffle Box</a>
+          <a href="#" className="pure-menu-heading pure-menu-link">Truffle Box</a>
         </nav>
 
         <main className="container">
@@ -107,82 +208,24 @@ class App extends Component {
             <div className="pure-u-1-2">
               <h2>User: {this.state.userAddress}</h2>
               <p>User attribute store: {this.state.attributeStoreInstance && this.state.attributeStoreInstance.address}</p>
-              <br/>
+              <br />
               <h3>Attributes</h3>
-              {Object.keys(attributes).map(e => 
+              {Object.keys(attributes).map(e =>
                 <div key={e}>{e} - {attributes[e]}</div>
               )}
-              <br/>
+              <br />
             </div>
             <div className="pure-u-1-2">
               <h3>Other addresses:</h3>
-              
+
               {this.state.accounts.map((acc, index) => (
                 index !== 0 ? <div key={index}>{acc}</div> : ""
               ))}
             </div>
-            <div className="pure-u-1-4">
-              <h3>Grant access</h3>
-              <div>
-                <label>Attribute Id </label> 
-                <input ref="attributeId"/>
-              </div>
-              <div>
-                <label>Attribute value </label> 
-                <input ref="attributeValue"/>
-              </div>
-              <div>
-                <label>Service address </label>
-                <input ref="serviceAddress"/>
-              </div>
-            
-              <button onClick={this.grantAccess}>Send</button>
-              <div>Check console for result</div>
-            </div>
-            <div className="pure-u-1-4">
-              <h3>Remove access</h3>
-              <div>
-                <label>Attribute Id </label> 
-                <input ref="removeAttributeId"/>
-              </div>
-              <div>
-                <label>Service address </label> 
-                <input ref="removeServiceAddress"/>
-              </div>
-
-              <button onClick={this.removeAccess}>Send</button>
-              <div>Check console for result</div>
-            </div>
-            <div className="pure-u-1-4">
-              <h3>Get attribute</h3>
-              <div>
-                <label>Attribute Id </label> 
-                <input ref="getAttributeId"/>
-              </div>
-              <div>
-                <label>Adress to send from</label> 
-                <input ref="getAttributeFromAddress"/>
-              </div>
-
-              <button onClick={this.getAttribute}>Send</button>
-              <div>Check console for result</div>
-            </div>
-            <div className="pure-u-1-4">
-              <h3>Request attribute access</h3>
-              <div>
-                <label>Attribute Id </label> 
-                <input ref="requestAttributeId"/>
-              </div>
-              <div>
-                <label>Adress to send from</label> 
-                <input ref="requestAttributeFromAddress"/>
-              </div>
-
-              <button onClick={this.requestAttributeAccess}>Send</button>
-              <div>Check console for result</div>
-            </div>
-            
           </div>
+
+          {this.getServiceActions()}
+          {this.getUserActions()}
         </main>
       </div>
     );
