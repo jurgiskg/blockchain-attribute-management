@@ -2,13 +2,18 @@ pragma solidity ^0.4.23;
 
 contract ServiceRegister {
 
-    mapping (address => string) private services;
+    struct Service {
+        string registrationCode;
+        string name;
+    }
+    mapping (address => Service) private services;
 
-    function register(string encodedName) public {
-        services[msg.sender] = encodedName;
+    function register(string registrationCode, string name) public {
+        services[msg.sender].registrationCode = registrationCode;
+        services[msg.sender].name = name;
     }
 
-    function getServiceCode(address serviceAddress) public view returns (string) {
-        return services[serviceAddress];
+    function getService(address serviceAddress) public view returns (string, string) {
+        return (services[serviceAddress].registrationCode, services[serviceAddress].name);
     }
 }

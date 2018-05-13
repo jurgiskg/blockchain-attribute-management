@@ -49,7 +49,7 @@ class App extends Component {
     storeContract.setProvider(this.state.web3.currentProvider);
 
     const serviceRegisterContract = contract(ServiceRegisterContract);
-    serviceRegisterContract.setProvider(this.state.web3.currentProvider); 
+    serviceRegisterContract.setProvider(this.state.web3.currentProvider);
 
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
@@ -77,17 +77,23 @@ class App extends Component {
 
   accessRequested = (err, result) => {
     let message = <div>
-      <h3>Service: {result.args.serviceAddress}</h3>
-      <h3>User: {result.args.userAddress} </h3>
-      <h3>Attribute ID: {result.args.attributeId.c[0]}</h3>
-      </div>
+      <h4>Service: {result.args.serviceAddress}</h4>
+      <h4>User: {result.args.userAddress} </h4>
+      <h4>Attribute ID: {result.args.attributeId.c[0]}</h4>
+    </div>
     toast(message);
     this.checkServiceRegister(result.args.serviceAddress);
   }
 
   checkServiceRegister = (serviceAddress) => {
-    this.state.serviceRegisterInstance.getServiceCode.call(serviceAddress).then((result) => {
-      let msg = result === "" ? "Service has not registered!" : `Service has registered. Code: ${result}`;
+    this.state.serviceRegisterInstance.getService.call(serviceAddress).then((result) => {
+      let msg = result[0] === "" ?
+        <h3>Service has not registered!</h3> :
+        <div>
+          <h3>Service has registered.</h3>
+          <h4>Secret code: {result[0]}</h4>
+          <h4>Name: {result[1]}</h4>
+        </div>
       toast(msg);
     })
   }
@@ -121,11 +127,11 @@ class App extends Component {
           </div>
 
           <UserActions userAddress={this.state.userAddress} attributeStoreInstance={this.state.attributeStoreInstance} />
-          <ServiceActions userAddress={this.state.userAddress} 
+          <ServiceActions userAddress={this.state.userAddress}
             attributeStoreInstance={this.state.attributeStoreInstance}
             serviceRegisterInstance={this.state.serviceRegisterInstance} />
           <button onClick={this.notify}>Notify</button>
-          <ToastContainer autoClose={false}/>
+          <ToastContainer autoClose={false} />
         </main>
       </div>
     );

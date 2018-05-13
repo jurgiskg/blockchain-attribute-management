@@ -23,6 +23,7 @@ export default class ServiceActions extends React.Component {
 
     registerService = () => {
         this.props.serviceRegisterInstance.register(this.refs.registrationCode.value,
+            this.refs.serviceName.value,
             { from: this.refs.registerServiceAddress.value }
         ).then((result) => {
             console.log(result);
@@ -38,11 +39,15 @@ export default class ServiceActions extends React.Component {
                 <div className="pure-u-1-4">
                     <h3>Register service</h3>
                     <div>
-                        <label>Secret registration code</label>
+                        <label>Secret registration code </label>
                         <input ref="registrationCode" />
                     </div>
                     <div>
-                        <label>Address to send from</label>
+                        <label>Service name </label>
+                        <input ref="serviceName" />
+                    </div>
+                    <div>
+                        <label>Address to send from </label>
                         <input ref="registerServiceAddress" />
                     </div>
                     <button onClick={this.registerService}>Send</button>
