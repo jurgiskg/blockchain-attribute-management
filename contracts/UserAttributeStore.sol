@@ -5,7 +5,7 @@ contract UserAttributeStore {
         bool accessGranted;
         string value;
     }
-    mapping (address => mapping(uint => mapping(address => ServiceAttribute))) public attributes;
+    mapping (address => mapping(uint => mapping(address => ServiceAttribute))) private attributes;
 
     event AccessRequested (
         address userAddress,
