@@ -66,3 +66,7 @@ code {
   height: 16px;
   margin-right: 10px;
 }
+
+div.Toastify__toast-container {
+  width: auto;
+}

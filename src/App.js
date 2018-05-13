@@ -1,25 +1,30 @@
 import React, { Component } from 'react'
 import UserAttributeStoreContract from '../build/contracts/UserAttributeStore.json';
+import ServiceRegisterContract from '../build/contracts/ServiceRegister.json';
 import getWeb3 from './utils/getWeb3';
 import { attributes } from './attributes';
+import { estimatePrices } from './priceEstimation';
 import UserActions from './UserActions';
 import ServiceActions from './ServiceActions';
+import { ToastContainer, toast } from 'react-toastify';
 
 import './css/oswald.css'
 import './css/open-sans.css'
 import './css/pure-min.css'
 import './App.css'
+import 'react-toastify/dist/ReactToastify.css';
 
 const contract = require('truffle-contract')
 
 class App extends Component {
+
   constructor(props) {
     super(props)
 
     this.state = {
       userAddress: "",
-      attributeStoreContract: null,
       attributeStoreInstance: null,
+      serviceRegisterInstance: null,
       web3: null,
       accounts: []
     }
@@ -43,6 +48,8 @@ class App extends Component {
     const storeContract = contract(UserAttributeStoreContract);
     storeContract.setProvider(this.state.web3.currentProvider);
 
+    const serviceRegisterContract = contract(ServiceRegisterContract);
+    serviceRegisterContract.setProvider(this.state.web3.currentProvider); 
 
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
@@ -53,28 +60,35 @@ class App extends Component {
         from: accounts[0],
         gas: 4600000
       })
-      this.setState({ attributeStoreContract: storeContract });
 
-      storeContract.new().then((result) => {
+      storeContract.deployed().then((result) => {
         this.setState({ attributeStoreInstance: result });
-        this.estimatePrices(result);
+        let accessRequestedEvent = result.AccessRequested();
+        accessRequestedEvent.watch((err, result) => this.accessRequested(err, result));
+        //accessRequestedEvent.stopWatching();
+        estimatePrices(result, this.state.userAddress, this.state.accounts[2], 2, "Gpuvr9tLNzcAszMjCPXRMg==");
       });
+
+      serviceRegisterContract.deployed().then((result) => {
+        this.setState({ serviceRegisterInstance: result });
+      })
     })
   }
 
-  estimatePrices = (instance) => {
-    
-    instance.grantAccess.estimateGas(2, this.state.accounts[3], true, "").then((result) => {
-      console.log(`grantAccess(2, this.state.accounts[1], "tZM11CdI7z4mZJc+/5kg3Q=="): ${result}`)
-    })
-    instance.removeAccess.estimateGas(2, this.state.accounts[1]).then((result) => {
-      console.log(`removeAccess(2, this.state.accounts[1]): ${result}`)
-    })
-    instance.getAttribute.estimateGas(2, this.state.userAddress, this.state.accounts[1]).then((result) => {
-      console.log(`getAttribute(2, this.state.userAddress, this.state.accounts[1]): ${result}`)
-    })
-    instance.requestAccess.estimateGas(2, this.state.userAddress).then((result) => {
-      console.log(`requestAccess(2, this.state.userAddress): ${result}`);
+  accessRequested = (err, result) => {
+    let message = <div>
+      <h3>Service: {result.args.serviceAddress}</h3>
+      <h3>User: {result.args.userAddress} </h3>
+      <h3>Attribute ID: {result.args.attributeId.c[0]}</h3>
+      </div>
+    toast(message);
+    this.checkServiceRegister(result.args.serviceAddress);
+  }
+
+  checkServiceRegister = (serviceAddress) => {
+    this.state.serviceRegisterInstance.getServiceCode.call(serviceAddress).then((result) => {
+      let msg = result === "" ? "Service has not registered!" : `Service has registered. Code: ${result}`;
+      toast(msg);
     })
   }
 
@@ -108,6 +122,8 @@ class App extends Component {
 
           <UserActions userAddress={this.state.userAddress} attributeStoreInstance={this.state.attributeStoreInstance} />
           <ServiceActions userAddress={this.state.userAddress} attributeStoreInstance={this.state.attributeStoreInstance} />
+          <button onClick={this.notify}>Notify</button>
+          <ToastContainer autoClose={false}/>
         </main>
       </div>
     );

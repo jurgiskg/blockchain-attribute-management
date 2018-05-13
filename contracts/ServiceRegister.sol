@@ -4,11 +4,11 @@ contract ServiceRegister {
 
     mapping (address => string) private services;
 
-    function addService(string encodedName) public {
+    function register(string encodedName) public {
         services[msg.sender] = encodedName;
     }
 
-    function getServiceName(address serviceAddress) public view returns (string) {
+    function getServiceCode(address serviceAddress) public view returns (string) {
         return services[serviceAddress];
     }
 }
