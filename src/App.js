@@ -121,7 +121,9 @@ class App extends Component {
           </div>
 
           <UserActions userAddress={this.state.userAddress} attributeStoreInstance={this.state.attributeStoreInstance} />
-          <ServiceActions userAddress={this.state.userAddress} attributeStoreInstance={this.state.attributeStoreInstance} />
+          <ServiceActions userAddress={this.state.userAddress} 
+            attributeStoreInstance={this.state.attributeStoreInstance}
+            serviceRegisterInstance={this.state.serviceRegisterInstance} />
           <button onClick={this.notify}>Notify</button>
           <ToastContainer autoClose={false}/>
         </main>
