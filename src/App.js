@@ -62,7 +62,7 @@ class App extends Component {
 
   estimatePrices = (instance) => {
     
-    instance.grantAccess.estimateGas(2, this.state.accounts[1], true, "tZM11CdI7z4mZJc+/5kg3Q==").then((result) => {
+    instance.grantAccess.estimateGas(2, this.state.accounts[3], true, "").then((result) => {
       console.log(`grantAccess(2, this.state.accounts[1], "tZM11CdI7z4mZJc+/5kg3Q=="): ${result}`)
     })
     instance.removeAccess.estimateGas(2, this.state.accounts[1]).then((result) => {
@@ -71,8 +71,8 @@ class App extends Component {
     instance.getAttribute.estimateGas(2, this.state.userAddress, this.state.accounts[1]).then((result) => {
       console.log(`getAttribute(2, this.state.userAddress, this.state.accounts[1]): ${result}`)
     })
-    instance.requestAttributeAccess.estimateGas(2, this.state.userAddress).then((result) => {
-      console.log(`requestAttributeAccess(2, this.state.userAddress): ${result}`);
+    instance.requestAccess.estimateGas(2, this.state.userAddress).then((result) => {
+      console.log(`requestAccess(2, this.state.userAddress): ${result}`);
     })
   }
 
@@ -116,7 +116,7 @@ class App extends Component {
   }
 
   requestAttributeAccess = () => {
-    this.state.attributeStoreInstance.requestAttributeAccess(this.refs.requestAttributeId.value,
+    this.state.attributeStoreInstance.requestAccess(this.refs.requestAttributeId.value,
       this.state.userAddress,
       { from: this.refs.requestAttributeFromAddress.value }
     ).then((result) => {

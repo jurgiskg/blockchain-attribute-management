@@ -33,7 +33,7 @@ contract UserAttributeStore {
         emit AccessChanged(msg.sender, serviceAddress, attributeId, granted);
     }
 
-    function requestAttributeAccess(uint attributeId, address userAddress) public {
+    function requestAccess(uint attributeId, address userAddress) public {
         emit AccessRequested(userAddress, msg.sender, attributeId);
     }
 
@@ -45,6 +45,7 @@ contract UserAttributeStore {
         if (msg.sender == userAddress) {
             return attributes[msg.sender][attributeId][serviceAddress].value;
         }
+        //to avoid additional 'initialized' property, length check used
         if (bytes(attributes[userAddress][attributeId][serviceAddress].value).length == 0) {
             return "Please request access first";
         } else {
