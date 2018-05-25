@@ -3,7 +3,7 @@ import UserAttributeStoreContract from '../build/contracts/UserAttributeStore.js
 import ServiceRegisterContract from '../build/contracts/ServiceRegister.json';
 import getWeb3 from './utils/getWeb3';
 import { attributes } from './attributes';
-import { estimatePrices } from './priceEstimation';
+import { estimatePrices, estimateServiceRegisterPrices } from './priceEstimation';
 import UserActions from './UserActions';
 import ServiceActions from './ServiceActions';
 import { ToastContainer, toast } from 'react-toastify';
@@ -71,6 +71,7 @@ class App extends Component {
 
       serviceRegisterContract.deployed().then((result) => {
         this.setState({ serviceRegisterInstance: result });
+        estimateServiceRegisterPrices(result, "Secret code", "UAB Maxima");
       })
     })
   }

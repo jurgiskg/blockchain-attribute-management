@@ -13,4 +13,10 @@ const estimatePrices = (instance, userAccount, serviceAccount, attributeId, attr
   })
 }
 
-export { estimatePrices };
+const estimateServiceRegisterPrices = (instance, registrationCode, serviceName) => {
+  instance.register.estimateGas(registrationCode, serviceName).then((result) => {
+    console.log(`register(${registrationCode}, ${serviceName}): ${result}`);
+  })
+}
+
+export { estimatePrices, estimateServiceRegisterPrices };
