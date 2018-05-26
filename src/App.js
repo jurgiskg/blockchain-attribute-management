@@ -89,9 +89,9 @@ class App extends Component {
   checkServiceRegister = (serviceAddress) => {
     this.state.serviceRegisterInstance.getService.call(serviceAddress).then((result) => {
       let msg = result[0] === "" ?
-        <h3>Service has not registered!</h3> :
+        <h3>Service has not yet registered!</h3> :
         <div>
-          <h3>Service has registered.</h3>
+          <h3>Service has already registered.</h3>
           <h4>Secret code: {result[0]}</h4>
           <h4>Name: {result[1]}</h4>
         </div>
@@ -131,7 +131,6 @@ class App extends Component {
           <ServiceActions userAddress={this.state.userAddress}
             attributeStoreInstance={this.state.attributeStoreInstance}
             serviceRegisterInstance={this.state.serviceRegisterInstance} />
-          <button onClick={this.notify}>Notify</button>
           <ToastContainer autoClose={false} />
         </main>
       </div>

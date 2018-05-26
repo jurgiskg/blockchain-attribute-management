@@ -1,15 +1,20 @@
 # blockchain-attribute-management
-Sample React website to test Solidity smart contracts for digital identity attribute management and authorization. 
+Prototype to test digital identity attribute management based on blockchain. Consists of React and Truffle application to test smart contracts and
+interactive UI prototype of a mobile app.
 
-Used in VU MIF bachelor thesis "Digital Identity Management using Blockchain".
+Used for VU MIF Software Engineering bachelor thesis "Digital Identity Management using Blockchain".
+
+## Getting started
 
 To test smart contracts:
 
-1. Run 'npm install'
-2. Download 'ganache-cli' local blockchain from NPM
-3. Run 'ganache-cli' in administrator powershell
-4. Compile and deploy smart contracts: truffle compile, truffle migrate
-5. Run 'npm start'
-6. Test smart contracts in the browser
+1. Download packages. Run 'npm install' in console.
+2. Get local _ganache-cli_ blockchain network on your computer. Run 'npm install -g ganache-cli' in console.
+3. Start local blockchain network. Run 'ganache-cli' in Administrator Powershell.
+4. Compile and deploy smart contracts. Run 'truffle compile', 'truffle migrate' in another Administrator Powershell window.
+5. Start up app. Run 'npm start' in console.
+6. Test smart contracts in the app. Keep developer tools open to see relevant information in the browser console.
 
-To try interactive prototype - run file interactivePrototype.html in the browser.
+To try interactive prototype:
+
+Run file _interactivePrototype.html_ in the browser. The prototype is stateful - to get back to initial state, refresh the browser window.
